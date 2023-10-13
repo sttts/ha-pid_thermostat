@@ -19,8 +19,8 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.components.number import ATTR_VALUE, SERVICE_SET_VALUE
-from .ha_pid_shared import PidBaseClass
 from homeassistant.config_entries import ConfigEntry
+from .ha_pid_shared import PidBaseClass
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     ATTR_TEMPERATURE,
