@@ -1,18 +1,53 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "description": "If you need help with the configuration have a look here: https://github.com/ludeeus/integration_blueprint",
-                "data": {
-                    "username": "Username",
-                    "password": "Password"
-                }
-            }
+  "title": "PID thermostat",
+  "config": {
+    "step": {
+      "user": {
+        "description": "PID regulated thermostat",
+        "data": {
+          "cycle_time": "Duration between controller cycles",
+          "target_sensor": "Temperature input sensor entity",
+          "heater": "Heater device entity",
+          "kd": "Differential factor (Kd)",
+          "ki": "Integration factor (Ki)",
+          "kp": "Proportional gain factor (Kp)",
+          "ac_mode": "Thermostat mode",
+          "name": "Name"
         },
-        "error": {
-            "auth": "Username/Password is wrong.",
-            "connection": "Unable to connect to the server.",
-            "unknown": "Unknown error occurred."
+        "data_description": {
+          "kd": "Differential factor, damping the overshoot (Kd).",
+          "ki": "Integration factor, reducing offset fault over time (Ki).",
+          "kp": "Proportional gain factor, directly gaining the error to compensate the fault (Kp)."
         }
+      }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "cycle_time": "Duration between controller cycles",
+          "target_sensor": "Temperature input sensor entity",
+          "heater": "Heater device entity",
+          "kp": "Differential factor (Kd)",
+          "ki": "Integration factor (Ki)",
+          "kd": "Proportional gain factor (Kp)",
+          "ac_mode": "Thermostat mode"
+        },
+        "data_description": {
+          "kd": "Differential factor, damping the overshoot (Kd).",
+          "ki": "Integration factor, reducing offset fault over time (Ki).",
+          "kp": "Proportional gain factor, directly gaining the error to compensate the fault (Kp)."
+        }
+      }
+    }
+  },
+  "selector": {
+    "ac_mode": {
+      "options": {
+        "heat": "Heat",
+        "cool": "Cool"
+      }
+    }
+  }
 }

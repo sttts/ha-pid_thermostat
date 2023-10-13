@@ -1,80 +1,103 @@
-"""Adds config flow for Blueprint."""
-from __future__ import annotations
+"""Config flow for pid integration."""
+from collections.abc import Mapping
+import logging
+from typing import Any, cast
 
 import voluptuous as vol
-from homeassistant import config_entries
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
-from homeassistant.helpers import selector
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .api import (
-    IntegrationBlueprintApiClient,
-    IntegrationBlueprintApiClientAuthenticationError,
-    IntegrationBlueprintApiClientCommunicationError,
-    IntegrationBlueprintApiClientError,
+from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
+from homeassistant.components.pid_controller.config_flow import (
+    CONF_CYCLE_TIME,
+    CONF_PID_KD,
+    CONF_PID_KI,
+    CONF_PID_KP,
 )
-from .const import DOMAIN, LOGGER
+from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
+from homeassistant.const import CONF_NAME
+from homeassistant.helpers import selector
+from homeassistant.helpers.schema_config_entry_flow import (
+    SchemaConfigFlowHandler,
+    SchemaFlowFormStep,
+)
 
+from .const import (
+    AC_MODE_COOL,
+    AC_MODE_HEAT,
+    CONF_AC_MODE,
+    CONF_HEATER,
+    CONF_SENSOR,
+    DEFAULT_AC_MODE,
+    DEFAULT_CYCLE_TIME,
+    DEFAULT_PID_KD,
+    DEFAULT_PID_KI,
+    DEFAULT_PID_KP,
+    DOMAIN,
+)
 
-class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Blueprint."""
+_LOGGER = logging.getLogger(__name__)
 
-    VERSION = 1
+_AC_MODES = [
+    selector.SelectOptionDict(value=AC_MODE_HEAT, label="Heat"),
+    selector.SelectOptionDict(value=AC_MODE_COOL, label="Cool"),
+]
 
-    async def async_step_user(
-        self,
-        user_input: dict | None = None,
-    ) -> config_entries.FlowResult:
-        """Handle a flow initialized by the user."""
-        _errors = {}
-        if user_input is not None:
-            try:
-                await self._test_credentials(
-                    username=user_input[CONF_USERNAME],
-                    password=user_input[CONF_PASSWORD],
-                )
-            except IntegrationBlueprintApiClientAuthenticationError as exception:
-                LOGGER.warning(exception)
-                _errors["base"] = "auth"
-            except IntegrationBlueprintApiClientCommunicationError as exception:
-                LOGGER.error(exception)
-                _errors["base"] = "connection"
-            except IntegrationBlueprintApiClientError as exception:
-                LOGGER.exception(exception)
-                _errors["base"] = "unknown"
-            else:
-                return self.async_create_entry(
-                    title=user_input[CONF_USERNAME],
-                    data=user_input,
-                )
-
-        return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(
-                        CONF_USERNAME,
-                        default=(user_input or {}).get(CONF_USERNAME),
-                    ): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.TEXT
-                        ),
-                    ),
-                    vol.Required(CONF_PASSWORD): selector.TextSelector(
-                        selector.TextSelectorConfig(
-                            type=selector.TextSelectorType.PASSWORD
-                        ),
-                    ),
-                }
+OPTIONS_BASE_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_HEATER): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain=[NUMBER_DOMAIN]),
+        ),
+        vol.Required(CONF_SENSOR): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN]),
+        ),
+        vol.Optional(CONF_AC_MODE, default=DEFAULT_AC_MODE): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=_AC_MODES, translation_key=CONF_AC_MODE
             ),
-            errors=_errors,
-        )
+        ),
+        vol.Optional(CONF_PID_KI, default=DEFAULT_PID_KI): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0, step=0.01, mode=selector.NumberSelectorMode.BOX
+            ),
+        ),
+        vol.Optional(CONF_PID_KP, default=DEFAULT_PID_KP): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0, step=0.001, mode=selector.NumberSelectorMode.BOX
+            ),
+        ),
+        vol.Optional(CONF_PID_KD, default=DEFAULT_PID_KD): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0, step=0.001, mode=selector.NumberSelectorMode.BOX
+            ),
+        ),
+        vol.Optional(
+            CONF_CYCLE_TIME, default=DEFAULT_CYCLE_TIME
+        ): selector.DurationSelector(),
+    }
+)
 
-    async def _test_credentials(self, username: str, password: str) -> None:
-        """Validate credentials."""
-        client = IntegrationBlueprintApiClient(
-            username=username,
-            password=password,
-            session=async_create_clientsession(self.hass),
-        )
-        await client.async_get_data()
+
+CONFIG_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_NAME): selector.TextSelector(),
+    }
+).extend(OPTIONS_BASE_SCHEMA.schema)
+
+
+CONFIG_FLOW = {
+    "user": SchemaFlowFormStep(CONFIG_SCHEMA),
+}
+
+OPTIONS_FLOW = {
+    "init": SchemaFlowFormStep(OPTIONS_BASE_SCHEMA),
+}
+
+
+class PIDControllerPWMConfigFlow(SchemaConfigFlowHandler, domain=DOMAIN):
+    """PID thermostat Config handler."""
+
+    config_flow = CONFIG_FLOW
+    options_flow = OPTIONS_FLOW
+
+    def async_config_entry_title(self, options: Mapping[str, Any]) -> str:
+        """Return config entry title."""
+        return cast(str, options["name"]) if CONF_NAME in options else ""
