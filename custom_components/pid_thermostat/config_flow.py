@@ -6,13 +6,9 @@ from typing import Any, cast
 import voluptuous as vol
 
 from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
-from homeassistant.components.pid_controller.config_flow import (
-    CONF_CYCLE_TIME,
-    CONF_PID_KD,
-    CONF_PID_KI,
-    CONF_PID_KP,
-)
 from homeassistant.components.sensor import DOMAIN as SENSOR_DOMAIN
+from homeassistant.components.input_number import DOMAIN as INPUT_NUMBER_DOMAIN
+
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers import selector
 from homeassistant.helpers.schema_config_entry_flow import (
@@ -26,6 +22,10 @@ from .const import (
     CONF_AC_MODE,
     CONF_HEATER,
     CONF_SENSOR,
+    CONF_CYCLE_TIME,
+    CONF_PID_KD,
+    CONF_PID_KI,
+    CONF_PID_KP,
     DEFAULT_AC_MODE,
     DEFAULT_CYCLE_TIME,
     DEFAULT_PID_KD,
@@ -44,10 +44,10 @@ _AC_MODES = [
 OPTIONS_BASE_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HEATER): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain=[NUMBER_DOMAIN]),
+            selector.EntitySelectorConfig(domain=[NUMBER_DOMAIN, INPUT_NUMBER_DOMAIN]),
         ),
         vol.Required(CONF_SENSOR): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN]),
+            selector.EntitySelectorConfig(domain=[SENSOR_DOMAIN, INPUT_NUMBER_DOMAIN]),
         ),
         vol.Optional(CONF_AC_MODE, default=DEFAULT_AC_MODE): selector.SelectSelector(
             selector.SelectSelectorConfig(

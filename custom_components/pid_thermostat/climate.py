@@ -19,13 +19,7 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.components.number import ATTR_VALUE, SERVICE_SET_VALUE
-from homeassistant.components.pid_controller import (
-    CONF_CYCLE_TIME,
-    CONF_PID_KD,
-    CONF_PID_KI,
-    CONF_PID_KP,
-    PidBaseClass,
-)
+from .ha_pid_shared import PidBaseClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_ENTITY_ID,
@@ -56,6 +50,10 @@ from .const import (
     CONF_MIN_TEMP,
     CONF_SENSOR,
     CONF_TARGET_TEMP,
+    CONF_CYCLE_TIME,
+    CONF_PID_KD,
+    CONF_PID_KI,
+    CONF_PID_KP,
     DEFAULT_AC_MODE,
     DEFAULT_CYCLE_TIME,
     DEFAULT_NAME,
@@ -424,8 +422,14 @@ class PidThermostat(ClimateEntity, RestoreEntity, PidBaseClass):
         """If the toggleable device is currently active."""
         output_state = self.hass.states.get(self.heater_entity_id)
         if not output_state:
+            _LOGGER.warning("PID thermostat cannot detect output state")
             return None
-        if not self._pid.output:  # During startup pid controller returns None
+        if (
+            self._pid.output_limit_min is None
+        ):  # During startup pid controller returns None
+            _LOGGER.warning(
+                "PID thermostat pid controller not yet started: no output limit"
+            )
             return None
         # check if output state is minimal
         output = float(output_state.state)
