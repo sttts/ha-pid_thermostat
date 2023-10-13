@@ -2,22 +2,11 @@
 from homeassistant.components.climate import ClimateEntityFeature
 from homeassistant.const import Platform
 
-from .ha_pid_shared.const import (
-    ATTR_CYCLE_TIME,
-    ATTR_LAST_CYCLE_START,
-    ATTR_PID_ENABLE,
-    ATTR_PID_ERROR,
-    ATTR_PID_INPUT,
-    ATTR_PID_KD,
-    ATTR_PID_KI,
-    ATTR_PID_KP,
-    ATTR_PID_OUTPUT,
-    ATTR_VALUE,
+from .ha_pid_shared.const import (  # noqa: F401
     CONF_CYCLE_TIME,
     CONF_PID_KD,
     CONF_PID_KI,
     CONF_PID_KP,
-    SERVICE_ENABLE,
 )
 
 
