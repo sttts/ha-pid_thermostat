@@ -4,13 +4,11 @@ from unittest.mock import patch
 import pytest
 
 from homeassistant import config_entries
-from homeassistant.components.pid_controller.const import (
+from custom_components.pid_thermostat.const import (
     CONF_CYCLE_TIME,
     CONF_PID_KD,
     CONF_PID_KI,
     CONF_PID_KP,
-)
-from homeassistant.components.pid_thermostat.const import (
     CONF_AC_MODE,
     CONF_HEATER,
     CONF_SENSOR,
@@ -25,7 +23,7 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import CoreState, HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
-from tests.common import MockConfigEntry
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 
 @pytest.mark.parametrize("platform", ("climate",))
@@ -44,7 +42,7 @@ async def test_config_flow(
     assert result["errors"] is None
 
     with patch(
-        "homeassistant.components.pid_thermostat.async_setup_entry",
+        "custom_components.pid_thermostat.async_setup_entry",
         return_value=True,
     ) as mock_setup_entry:
         result = await hass.config_entries.flow.async_configure(

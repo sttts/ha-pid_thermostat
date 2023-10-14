@@ -18,13 +18,13 @@ from homeassistant.components.climate import (
     SERVICE_SET_TEMPERATURE,
     HVACMode,
 )
-from homeassistant.components.pid_controller.const import (
+from homeassistant.components.input_number import DOMAIN as INPUT_NUMBER_DOMAIN
+from homeassistant.components.input_number import CONF_MIN, CONF_MAX, CONF_STEP
+from custom_components.pid_thermostat.const import (
     CONF_CYCLE_TIME,
     CONF_PID_KD,
     CONF_PID_KI,
     CONF_PID_KP,
-)
-from homeassistant.components.pid_thermostat.const import (
     AC_MODE_COOL,
     AC_MODE_HEAT,
     CONF_AC_MODE,
@@ -33,7 +33,7 @@ from homeassistant.components.pid_thermostat.const import (
     DEFAULT_NAME,
     DOMAIN,
 )
-from homeassistant.components.slow_pwm.const import CONF_OUTPUTS
+
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     ATTR_TEMPERATURE,
@@ -47,15 +47,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.setup import async_setup_component
 from homeassistant.util.unit_system import METRIC_SYSTEM
 
-from tests.common import async_mock_service
-from tests.components.blueprint.conftest import stub_blueprint_populate  # noqa: F401
+from pytest_homeassistant_custom_component.common import async_mock_service
 
 LOGGER = logging.getLogger(__name__)
 
 
 ENTITY_CLIMATE = "climate.pid_thermostat"
 ENTITY_SENSOR = "sensor.temperature"
-ENTITY_HEATER = "number.heater"
+ENTITY_HEATER = "input_number.heater"
 CYCLE_TIME = 0.01
 
 CLIMATE_CONFIG = {
@@ -67,26 +66,29 @@ CLIMATE_CONFIG = {
         CONF_CYCLE_TIME: {"seconds": CYCLE_TIME},
     }
 }
-
 NUMBER_CONFIG = {
-    Platform.NUMBER: {
-        CONF_PLATFORM: "slow_pwm",
-        CONF_NAME: "heater",
-        CONF_OUTPUTS: ["switch.heater"],
+    "input_number": {
+        "heater": {
+            CONF_NAME: "Floor heater",
+            CONF_MIN: 0,
+            CONF_MAX: 100,
+            CONF_STEP: 1,
+        }
     }
 }
 
 
 @pytest.fixture(autouse=True)
-async def setup_helpers(hass):
+async def fixture_setup_helpers(hass):
     """Initialize hass and helper components."""
     hass.config.units = METRIC_SYSTEM
     hass.states.async_set(ENTITY_SENSOR, 10.0)
     # Mock on/off switching for slow_pwm component component
-    async_mock_service(hass, "homeassistant", "turn_on")
-    async_mock_service(hass, "homeassistant", "turn_off")
+    # async_mock_service(hass, "homeassistant", "turn_on")
+    # async_mock_service(hass, "homeassistant", "turn_off")
     # Create a number, required by the climate component first
-    assert await async_setup_component(hass, Platform.NUMBER, NUMBER_CONFIG)
+    # hass.states.async_set(ENTITY_HEATER, 0.0)
+    assert await async_setup_component(hass, "input_number", NUMBER_CONFIG)
 
 
 async def _setup_pid_climate(hass, config):

@@ -1,16 +1,15 @@
 """Test the PID thermostat integration."""
 import pytest
 
-from homeassistant.components.pid_thermostat.const import (
+from homeassistant.const import CONF_NAME
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+from custom_components.pid_thermostat.const import (
     CONF_HEATER,
     CONF_SENSOR,
     DOMAIN,
 )
-from homeassistant.const import CONF_NAME
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers import entity_registry as er
-
-from tests.common import MockConfigEntry
 
 
 @pytest.mark.parametrize("platform", ("climate",))
