@@ -12,30 +12,18 @@
 
 This integration contains a PID regulated thermostat. 
 
-It uses a sensor and a number entity connected to a heater or air conditioning under the hood. A typical method to create a number to control a heater or cooler could be to use the [slow_pwm number integration][slow_pwm]. When in heater mode, if the measured temperature is cooler than the target temperature, the heater will be regulated to the required temperature is reached. When in air conditioning mode, if the measured temperature is hotter than the target temperature, the air conditioning will be regulated to the required temperature. One PID Thermostat entity can only control one number output. If you need to activate two numbers, one for a heater and one for an air conditioner, you will need two PID Thermostat entities. The value for the output number entity will be calculated using the Proportional–Integral–Derivative algorithm (PID, See [https://en.wikipedia.org/wiki/PID_controller]). The implementation of the PID controller contains bumpless operation, and is prevented against integral windup by clipping of the output value to the minimum and maximum of the corresponding output number entity. Setting up the optimal parameters for a PID controller can be a tough job. Depending on your particular job, you might already know more or less what the parameters should be. If required, you could use [manual tuning][https://en.wikipedia.org/wiki/PID_controller#Manual_tuning] to find optimal parameters.
+It uses a sensor and a number entity connected to a heater or air conditioning. A typical method to create a number to control a heater or cooler could be to use the [slow_pwm number integration][slow_pwm]. When in heater mode, if the measured temperature is cooler than the target temperature, the heater will be regulated until the required temperature is reached. When in air conditioning mode, if the measured temperature is hotter than the target temperature, the air conditioning will be regulated until the required temperature is reached. One PID Thermostat entity can only control one number output. If you need to activate two numbers (one for a heater and one for an air conditioner), you will need two PID Thermostat entities. The value for the output number entity will be calculated using the [Proportional–Integral–Derivative algorithm (PID)](https://en.wikipedia.org/wiki/PID_controller). The implementation of the PID controller contains bumpless operation, and is prevented against integral windup by clipping of the output value to the minimum and maximum of the corresponding output number entity. Setting up the optimal parameters for a PID controller can be a tough job. Depending on your particular job, you might already know more or less what the parameters should be. If required, you could use [manual tuning](https://en.wikipedia.org/wiki/PID_controller#Manual_tuning) to find optimal parameters. In short, you should make the following steps:
 - For kp, start with 100; if your thermostat deviates by 1 °C, you might want the heater to turn on for 100%. If required, gradually make it bigger if you see that the direct reaction of the controller is too low.
-- For ki, keep this number to 0 until kp is set. Then, start with a small number (0.1). If you see that the reaction over time is only slowly rising, then increase it, until the controller regulates to the setpoint in a reasonable amount of time.
+- For ki, keep this number to 0 until kp is set. Then, start with a small number (0.1). If you see that the reaction over time is only slowly rising, increase it until the controller regulates to the setpoint in a reasonable amount of time.
 - For kd, keep this number to 0 until kp and ki are set. Now you can use the kd to prevent the regulator from overshooting. Only increase in small steps.
 
-The value for a number entity will be calculated using the Proportional–Integral–Derivative algorithm (PID, See [wikipedia](https://en.wikipedia.org/wiki/PID_controller) ), depending on the difference between measured temperature and wish temperature. 
-
-The implementation of the PID controller contains bumpless operation, and is prevented against integral windup by clipping of the output value to the minimum and maximum of the corresponding output number entity.
-
-This controller is typically useful in regulated systems. For example to regulate the speed of a water pump in a heat collector to keep the temperature difference between the outgoing and incomming water stream on a certain level, so that the heat collector will perform optimally.
-
-Setting up the optimal parameters for a PID controller can be a tough job. Depending on your particular job, you might already know more or less what the parameters should be. If required, you could use [manual tuning](https://en.wikipedia.org/wiki/PID_controller#Manual_tuning) to find optimal parameters. A small summary for PID tuning:
-- For kp, start with a small number (1) and gradually make it bigger if you see that the direct reaction of the controller is too low. Increase the kp, until the output oscillates, then set it to half of this value.
-- For ki, keep this number to 0 until kp is set. Then, start with a very small number (0.01). If you see that the reaction over time is only slowly rising, then increase it, until the controller regulates to the setpoint in a reasonable amount of time.
-- For kd, keep this number to 0 until kp and ki are set. Now, you can use the kd to prevent the regulator from overshooting. Only increase in small steps.
-
-The PID thermostat code is shared with the [PID controller][pid_controller]. As an output for the controller, the [Slow PWM][slow_pwm] number can be used.
+The PID thermostat code is shared with the [PID controller][pid_controller]. As an output for the thermostat, the [Slow PWM][slow_pwm] number can be used.
 
 **This integration will set up the following platforms.**
 
 Platform | Description
 -- | --
-`climate` | This platform can be used to control a number entity output to regulate a temperature sensor value to a specific setpoint. The value of the climate entity is the setpoint. As a sensor, any temperature sensor entity can be used.
-
+`climate` | This platform can be used to control a number entity output to regulate a temperature to a specific setpoint. The value of the climate entity is the setpoint. As a sensor, any temperature sensor entity can be used.
 
 ## Installation
 
