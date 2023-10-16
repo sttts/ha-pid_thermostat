@@ -18,7 +18,7 @@ from homeassistant.components.climate import (
     SERVICE_SET_TEMPERATURE,
     HVACMode,
 )
-from homeassistant.components.input_number import DOMAIN as INPUT_NUMBER_DOMAIN
+
 from homeassistant.components.input_number import CONF_MIN, CONF_MAX, CONF_STEP
 from custom_components.pid_thermostat.const import (
     CONF_CYCLE_TIME,
@@ -47,7 +47,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.setup import async_setup_component
 from homeassistant.util.unit_system import METRIC_SYSTEM
 
-from pytest_homeassistant_custom_component.common import async_mock_service
 
 LOGGER = logging.getLogger(__name__)
 
